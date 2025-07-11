@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: openrouter-backend
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node index.js
+    envVars:
+      - key: OPENROUTER_API_KEY
+        value: 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
