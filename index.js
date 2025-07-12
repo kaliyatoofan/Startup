@@ -4,7 +4,7 @@ const fetch = require("node-fetch");
 require("dotenv").config();
 
 const app = express();
-app.use(cors({ origin: "https://kalyaxxtoofan.serv00.net" })); // allow all origins (can restrict to serv00.net)
+app.use(cors()); // Use { origin: "https://kalyaxxtoofan.serv00.net" } later for security
 app.use(express.json());
 
 app.post("/chat", async (req, res) => {
@@ -16,7 +16,7 @@ app.post("/chat", async (req, res) => {
       headers: {
         "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
         "HTTP-Referer": "https://kalyaxxtoofan.serv00.net",
-        "X-Title": "StartupNest", // your brand
+        "X-Title": "StartupNest",
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -31,10 +31,19 @@ app.post("/chat", async (req, res) => {
     });
 
     const data = await response.json();
-    res.json(data);
+    console.log("OpenRouter response:", JSON.stringify(data, null, 2)); // Debug output
+
+    if (data.choices && data.choices.length > 0) {
+      res.json({ message: data.choices[0].message.content });
+    } else if (data.error) {
+      res.status(500).json({ error: data.error.message });
+    } else {
+      res.status(500).json({ error: "No valid response received from OpenRouter." });
+    }
+
   } catch (error) {
     console.error("Error:", error);
-    res.status(500).json({ error: "Something went wrong" });
+    res.status(500).json({ error: "Internal server error." });
   }
 });
 
